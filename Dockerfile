@@ -11,7 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 COPY docker ./docker
-COPY .env.example ./
 
 EXPOSE 8080
 
