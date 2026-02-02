@@ -1,11 +1,13 @@
 """Shared pytest fixtures for API, async event loop, and test DB setup."""
 
+import os
+os.environ.setdefault("ENVIRONMENT", "test")
+
 from app.models.route import Route
 from app.models.gate import Gate
 from app.db.session import get_db_session
 from app.db.base import Base
 from app.main import app
-import os
 import sys
 import asyncio
 from typing import AsyncGenerator
@@ -18,11 +20,6 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
-# IMPORTANT:
-# Ensure the app boots in "test" mode during pytest.
-# This prevents startup() from running Render/Postgres init logic.
-os.environ.setdefault("ENVIRONMENT", "test")
 
 
 # Import models so Base.metadata is populated
