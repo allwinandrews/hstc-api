@@ -29,7 +29,7 @@ class CheapestPathOut(BaseModel):
 
 
 class TransportBreakdownOut(BaseModel):
-    """Breakdown of transport trips, per-trip costs, and totals."""
+    """Breakdown of trips, per-trip costs, and totals for a single-mode plan."""
     hstc_trips: int = Field(..., ge=0)
     personal_trips: int = Field(..., ge=0)
 
@@ -43,12 +43,12 @@ class TransportBreakdownOut(BaseModel):
 
 
 class TransportResponseOut(BaseModel):
-    """Transport pricing response including the chosen plan and both mode totals."""
+    """Transport pricing response including the chosen single-mode plan and both mode totals."""
     distance_au: float = Field(..., gt=0)
     passengers: int = Field(..., gt=0)
     parking_days: int = Field(..., ge=0)
 
-    # Cheapest plan chosen by the transport planner.
+    # Cheapest single-mode plan chosen by the transport planner.
     total_cost_gbp: float = Field(..., ge=0)
     plan: TransportBreakdownOut
 
@@ -56,5 +56,5 @@ class TransportResponseOut(BaseModel):
     hstc_only_total_gbp: float = Field(..., ge=0)
     personal_only_total_gbp: float = Field(..., ge=0)
 
-    # Chosen mode as a simple label for clients.
+    # Chosen mode is always "HSTC" or "PERSONAL" for single-mode plans.
     chosen_mode: str = Field(..., min_length=1)

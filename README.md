@@ -33,7 +33,8 @@ Gate data (directed edges and HU distances) is seeded locally via SQL.
 The API should expose at least the following public endpoints:
 
 - GET /transport/{distance}?passengers={number}&parking={days}
-  - Returns the cheapest vehicle to use (and the cost) for the given distance (in AU), passenger count, and parking days.
+- Returns the cheapest single-mode vehicle plan (and the cost) for the given distance (in AU), passenger count, and parking days.
+- Single-mode transport policy: For /transport, we interpret “cheapest vehicle to use” as selecting a single transport mode for the entire journey to the gate (either Personal Transport or HSTC Transport). Mixed-mode plans (combining Personal and HSTC trips) are intentionally not considered to keep the pricing model aligned with a single booking flow and to avoid multi-provider coordination and edge-case arbitrage caused by differing vehicle capacities. A future enhancement could add a dedicated endpoint for mixed-mode optimization if required.
 - GET /gates
   - Returns a list of gates with their information.
 - GET /gates/{gateCode}

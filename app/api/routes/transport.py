@@ -54,10 +54,13 @@ async def get_transport_cost(
     personal_only_total = _round_money(
         personal_only_vehicles * personal_trip_with_parking)
 
-    # Label the chosen plan for the response schema.
+    # Label the chosen plan for the response schema (single-mode only).
     if plan.hstc_trips > 0 and plan.personal_trips > 0:
-        chosen_mode = "MIXED"
-    elif plan.hstc_trips > 0:
+        raise HTTPException(
+            status_code=500,
+            detail="transport planner returned a mixed plan; single-mode required",
+        )
+    if plan.hstc_trips > 0:
         chosen_mode = "HSTC"
     else:
         chosen_mode = "PERSONAL"
