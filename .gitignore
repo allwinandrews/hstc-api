@@ -32,3 +32,7 @@ build/
 dist/
 *.egg-info/
 "@ | Set-Content .gitignore
+
+# Local test SQLite DB
+test.db
+
