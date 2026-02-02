@@ -1,28 +1,7 @@
 """Application configuration loaded from environment variables."""
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-def _normalize_async_db_url(url: str) -> str:
-    """
-    Render provides DATABASE_URL like:
-      postgresql://user:pass@host:5432/db
-
-    SQLAlchemy async expects:
-      postgresql+asyncpg://user:pass@host:5432/db
-    """
-    if not url:
-        return url
-
-    # Some providers use "postgres://" alias; normalize it too.
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
-
-    # Convert sync URL to SQLAlchemy async URL (asyncpg)
-    if url.startswith("postgresql://") and not url.startswith("postgresql+asyncpg://"):
-        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-    return url
 
 
 class Settings(BaseSettings):
@@ -32,12 +11,10 @@ class Settings(BaseSettings):
     app_name: str = "Hyperspace Tunneling Corp API"
     environment: str = "local"
 
-    # Preferred on hosted platforms (Render/Heroku/etc.)
-    # Render sets DATABASE_URL automatically if you link a Postgres instance,
-    # or you can set it yourself in the Render dashboard.
-    database_url: str | None = None
+    # Render typically provides DATABASE_URL (sync-style URL)
+    database_url_raw: str | None = Field(default=None, alias="DATABASE_URL")
 
-    # Database (local fallback)
+    # Local DB vars (still supported for docker-compose / local dev)
     db_host: str = "localhost"
     db_port: int = 5432
     db_name: str = "hstc"
@@ -47,18 +24,31 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property
-    def sqlalchemy_database_url(self) -> str:
+    def database_url(self) -> str:
         """
-        Final SQLAlchemy async connection URL.
+        Build the SQLAlchemy async connection string.
 
         Priority:
-        1) DATABASE_URL (hosted envs)
-        2) DB_* parts (local dev)
-        """
-        if self.database_url:
-            return _normalize_async_db_url(self.database_url)
+        1) DATABASE_URL (Render)
+        2) Individual DB_* vars (local/dev)
 
-        # Local dev fallback
+        Also normalize:
+        - postgres:// -> postgresql://
+        - postgresql:// -> postgresql+asyncpg://
+        """
+        if self.database_url_raw:
+            url = self.database_url_raw.strip()
+
+            # Normalize legacy prefix
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
+
+            # Ensure async driver
+            if url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+            return url
+
         return (
             f"postgresql+asyncpg://{self.db_user}:{self.db_password}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"

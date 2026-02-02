@@ -1,5 +1,11 @@
 """Shared pytest fixtures for API, async event loop, and test DB setup."""
 
+from app.models.route import Route
+from app.models.gate import Gate
+from app.db.session import get_db_session
+from app.db.base import Base
+from app.main import app
+import os
 import sys
 import asyncio
 from typing import AsyncGenerator
@@ -13,13 +19,13 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.main import app
-from app.db.base import Base
-from app.db.session import get_db_session
+# IMPORTANT:
+# Ensure the app boots in "test" mode during pytest.
+# This prevents startup() from running Render/Postgres init logic.
+os.environ.setdefault("ENVIRONMENT", "test")
+
 
 # Import models so Base.metadata is populated
-from app.models.gate import Gate
-from app.models.route import Route
 
 
 # Fix Windows event loop edge-cases during pytest teardown.
@@ -47,7 +53,7 @@ def test_engine():
     """
     Test database engine.
 
-    Uses SQLite so CI/Render doesn't need a running Postgres instance.
+    Uses SQLite so CI doesn't need a running Postgres instance.
     File-based SQLite is more stable than in-memory for async tests.
     """
     return create_async_engine(
