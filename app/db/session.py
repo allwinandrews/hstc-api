@@ -6,7 +6,7 @@ from app.core.config import settings
 
 # Create a single async engine for the whole app.
 engine = create_async_engine(
-    settings.database_url,
+    settings.sqlalchemy_database_url,
     echo=False,  # Set True temporarily if you want verbose SQL logs.
     pool_pre_ping=True,
 )
