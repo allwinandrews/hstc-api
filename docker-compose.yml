@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    container_name: hstc_postgres
+    environment:
+      POSTGRES_DB: hstc
+      POSTGRES_USER: hstc
+      POSTGRES_PASSWORD: hstc
+    ports:
+      - "5432:5432"
+    volumes:
+      - hstc_db_data:/var/lib/postgresql/data
+      - ./docker/postgres/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hstc -d hstc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  hstc_db_data:

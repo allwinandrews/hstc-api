@@ -1,0 +1,507 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hyperspace Tunneling Corp API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/gates": {
+      "get": {
+        "tags": [
+          "gates"
+        ],
+        "summary": "List Gates",
+        "description": "Return all gates ordered by code.",
+        "operationId": "list_gates_gates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GateOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Gates Gates Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gates/{gate_code}": {
+      "get": {
+        "tags": [
+          "gates"
+        ],
+        "summary": "Get Gate",
+        "description": "Return a single gate with its outgoing directed routes.",
+        "operationId": "get_gate_gates__gate_code__get",
+        "parameters": [
+          {
+            "name": "gate_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Gate Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GateDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gates/{gate_code}/to/{target_gate_code}": {
+      "get": {
+        "tags": [
+          "gates"
+        ],
+        "summary": "Get Cheapest Path",
+        "description": "Return the cheapest directed path and optional hyperspace cost.\n\nValidation rules:\n- gate codes must be exactly 3 characters\n- passengers (if provided) must be > 0\n\nError responses:\n- 400 for invalid gate codes\n- 404 if either gate is missing or no route exists",
+        "operationId": "get_cheapest_path_gates__gate_code__to__target_gate_code__get",
+        "parameters": [
+          {
+            "name": "gate_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Gate Code"
+            }
+          },
+          {
+            "name": "target_gate_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Target Gate Code"
+            }
+          },
+          {
+            "name": "passengers",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Passengers"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheapestPathOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transport/{distance}": {
+      "get": {
+        "tags": [
+          "transport"
+        ],
+        "summary": "Get Transport Cost",
+        "description": "Compute transport pricing for a distance and passenger count.\n\nValidation rules:\n- distance must be > 0 (path parameter)\n- passengers must be > 0 (query parameter)\n- parking must be >= 0 (query parameter)\n\nError responses:\n- 400 for invalid distance or planner validation errors\n- 422 for FastAPI query validation failures",
+        "operationId": "get_transport_cost_transport__distance__get",
+        "parameters": [
+          {
+            "name": "distance",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Distance"
+            }
+          },
+          {
+            "name": "passengers",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "title": "Passengers"
+            }
+          },
+          {
+            "name": "parking",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Parking"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransportResponseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health Check",
+        "description": "Lightweight liveness probe for deployment and tests.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CheapestPathOut": {
+        "properties": {
+          "path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 2,
+            "title": "Path"
+          },
+          "total_hu": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Total Hu"
+          },
+          "passengers": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Passengers"
+          },
+          "hyperspace_cost_gbp": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hyperspace Cost Gbp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "total_hu"
+        ],
+        "title": "CheapestPathOut",
+        "description": "Shortest path response; includes optional hyperspace cost."
+      },
+      "GateDetailOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "outgoing": {
+            "items": {
+              "$ref": "#/components/schemas/RouteOut"
+            },
+            "type": "array",
+            "title": "Outgoing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "outgoing"
+        ],
+        "title": "GateDetailOut",
+        "description": "Gate details including outgoing routes."
+      },
+      "GateOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "GateOut",
+        "description": "Basic gate summary used in list views."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RouteOut": {
+        "properties": {
+          "to_code": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "To Code"
+          },
+          "hu_distance": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Hu Distance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "to_code",
+          "hu_distance"
+        ],
+        "title": "RouteOut",
+        "description": "Outgoing directed route from a gate."
+      },
+      "TransportBreakdownOut": {
+        "properties": {
+          "hstc_trips": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Hstc Trips"
+          },
+          "personal_trips": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Personal Trips"
+          },
+          "hstc_trip_cost_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Hstc Trip Cost Gbp"
+          },
+          "personal_trip_cost_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Personal Trip Cost Gbp"
+          },
+          "hstc_total_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Hstc Total Gbp"
+          },
+          "personal_total_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Personal Total Gbp"
+          },
+          "total_capacity": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Capacity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hstc_trips",
+          "personal_trips",
+          "hstc_trip_cost_gbp",
+          "personal_trip_cost_gbp",
+          "hstc_total_gbp",
+          "personal_total_gbp",
+          "total_capacity"
+        ],
+        "title": "TransportBreakdownOut",
+        "description": "Breakdown of transport trips, per-trip costs, and totals."
+      },
+      "TransportResponseOut": {
+        "properties": {
+          "distance_au": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Distance Au"
+          },
+          "passengers": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Passengers"
+          },
+          "parking_days": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Parking Days"
+          },
+          "total_cost_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Total Cost Gbp"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/TransportBreakdownOut"
+          },
+          "hstc_only_total_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Hstc Only Total Gbp"
+          },
+          "personal_only_total_gbp": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Personal Only Total Gbp"
+          },
+          "chosen_mode": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Chosen Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_au",
+          "passengers",
+          "parking_days",
+          "total_cost_gbp",
+          "plan",
+          "hstc_only_total_gbp",
+          "personal_only_total_gbp",
+          "chosen_mode"
+        ],
+        "title": "TransportResponseOut",
+        "description": "Transport pricing response including the chosen plan and both mode totals."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
