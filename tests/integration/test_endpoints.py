@@ -61,8 +61,17 @@ async def test_cheapest_path_with_passengers(client):
     assert r.status_code == 200
     body = r.json()
     assert body["passengers"] == 3
-    assert body["hyperspace_cost_gbp"] is not None
-    assert body["hyperspace_cost_gbp"] > 0
+    assert body["hyperspace_cost_gbp"] == 101.1
+
+
+@pytest.mark.asyncio
+async def test_cheapest_path_with_passengers_prx_to_cas(client):
+    """Cheapest path pricing matches one-way hyperspace cost."""
+    r = await client.get("/gates/PRX/to/CAS?passengers=2")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["passengers"] == 2
+    assert body["hyperspace_cost_gbp"] == 60.0
 
 
 @pytest.mark.asyncio

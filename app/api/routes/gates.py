@@ -1,5 +1,7 @@
 """Gate and routing endpoints, including cheapest-path calculations."""
 
+from decimal import Decimal, ROUND_HALF_UP
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -91,12 +93,16 @@ async def get_cheapest_path(
             detail=f"No route from '{gate_code}' to '{target_gate_code}'",
         )
 
-    # Hyperspace cost: outbound + inbound legs.
-    # total_cost = 2 * (0.10 * passengers * total_HU_of_path)
+    # Hyperspace cost: one-way journey along the directed path.
+    # total_cost = 0.10 * passengers * total_HU_of_path
     hyperspace_cost = None
     if passengers is not None:
-        hyperspace_cost = round(
-            2 * (0.10 * passengers * result.total_weight), 2)
+        cost = (
+            Decimal("0.10")
+            * Decimal(passengers)
+            * Decimal(result.total_weight)
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        hyperspace_cost = float(cost)
 
     return CheapestPathOut(
         path=result.path,
