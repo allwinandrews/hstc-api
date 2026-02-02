@@ -14,7 +14,7 @@ Transport to the gate:
 - Personal transport: 0.30 GBP per AU plus 5 GBP per day for ship storage at the gate (fits up to 4 people)
 - HSTC transport: 0.45 GBP per AU (fits up to 5 people)
 
-Hyperspace journey:
+Hyperspace journey::
 
 - Spaceflight: 0.10 GBP per passenger per hyperplane unit (HU)
 - Total hyperspace cost is outbound + inbound (2x the one-way cost)
