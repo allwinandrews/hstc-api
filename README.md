@@ -71,6 +71,10 @@ uvicorn app.main:app --reload
 The OpenAPI docs are available at:
 `http://localhost:8000/docs`
 
+## Deployment
+
+The API (and its interactive docs) is deployed on Render at `https://hstc-api.onrender.com/docs`.
+
 ## Environment
 
 Configuration defaults are defined in `app/core/config.py`. Override via `.env`.

@@ -44,31 +44,30 @@ Source of requirements:
   - Notes: Runs `pytest` on push and pull requests.
 
 ## Pending / Missing
-- [ ] Deployed API link.
-  - What is missing: URL to a running deployment.
-  - Where to implement: `README.md` or `docs/`.
-  - Suggested next step: deploy (e.g., Render/Fly/Heroku) and add the link.
-- [ ] Diagrams, plans, or design notes.
-  - What is missing: design artifacts.
-  - Where to implement: `docs/`.
-  - Suggested next step: add a short architecture diagram or design notes.
-- [ ] Infrastructure config/code (Terraform, etc.).
-  - What is missing: infra-as-code beyond local Docker.
-  - Where to implement: `infra/` or `terraform/`.
-  - Suggested next step: add Terraform or equivalent if deployment is expected.
+- [x] Deployed API link.
+  - Evidence: `README.md`.
+  - Notes: Render deployment available at `https://hstc-api.onrender.com/docs`.
+- [x] Diagrams, plans, or design notes.
+  - Evidence: `docs/architecture.md`.
+  - Notes: High-level architecture summary covering FastAPI, repos, algorithms, and Postgres seed flow.
+ - [ ] Infrastructure config/code (Terraform, etc.).
+   - What is missing: infra-as-code beyond local Docker.
+   - Where to implement: `infra/` or `terraform/`.
+   - Suggested next step: add Terraform or equivalent if deployment is expected; current deployment was configured manually via the Render dashboard.
 
 ## Quality / Delivery
-- [ ] Deployed API link: missing (no link in repo).
+- [x] Deployed API link: provided (README now notes Render docs).
 - [x] API docs available at runtime (FastAPI automatic docs).
   - Evidence: `app/main.py` (FastAPI app), `app/api/routes/*`.
 - [x] API docs artifact: present.
   - Evidence: `docs/openapi.json`.
-- [ ] Diagrams/plans/notes: missing (no design docs found).
+- [x] Diagrams/plans/notes: present (architecture summary added).
+  - Evidence: `docs/architecture.md`.
 - [x] Tests: present (unit + integration).
   - Evidence: `tests/unit/*`, `tests/integration/test_endpoints.py`.
 - [x] CI/CD config: present.
   - Evidence: `.github/workflows/tests.yml`.
-- [ ] Infra config: partially present (local `docker-compose.yml` only).
+- [ ] Infra config: partially present (local `docker-compose.yml` + Render notes only).
 - [x] Local run instructions: present.
   - Evidence: `README.md`.
 - [x] Supporting scripts: present.
